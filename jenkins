@@ -1,0 +1,52 @@
+pipeline {
+    agent any
+    environment {
+        dockerImage = ''
+        registry = "munigalaashok/app"
+        registryCredential = 'dockerhub_id'
+        
+    }
+    stages {
+        stage("checkout branch") {
+            steps {
+                checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/Ashokm96/mypythonapp']]])
+            }
+        }
+        stage("build dokcer image") {
+            steps {
+                script {
+                    dockerImage = docker.build registry
+                }
+                
+            }
+        }
+        stage("upload image") {
+            steps {
+                script {
+                    docker.withRegistry( '', registryCredential ) {
+                    dockerImage.push()
+                    dockerImage.push('new')
+                    }
+                }
+            }
+        }
+  
+// Stopping Docker containers for cleaner Docker run
+        stage('docker stop container') {
+             steps {
+                 sh 'docker ps -f name=app -q | xargs --no-run-if-empty docker container stop'
+                 sh 'docker container ls -a -fname=app -q | xargs -r docker container rm'
+            } 
+        }    
+    
+    
+    // Running Docker container, make sure port 8096 is opened in 
+        stage('Docker Run') {
+             steps{
+                 script {
+                 dockerImage.run("-p 8096:5000 --rm --name app")
+                       }
+                }
+            }  
+        } 
+    }
