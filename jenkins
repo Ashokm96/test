@@ -10,11 +10,6 @@ pipeline {
         
     }
     stages {
-        stage("checkout branch") {
-            steps {
-                checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/Ashokm96/mypythonapp']]])
-            }
-        }
         stage("build dokcer image") {
             steps {
                 script {
