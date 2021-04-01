@@ -1,0 +1,7 @@
+commands
+
+docker build -t project -f docker .
+
+images run as a container
+
+docker run -dp 80:80 --name demo project:latest
